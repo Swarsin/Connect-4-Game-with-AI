@@ -31,6 +31,44 @@ INSERT INTO user (username, wins)
 VALUES ("who am i", 23)
                """)
 
+cursor.execute("""
+INSERT INTO user (username, wins)
+VALUES ("sdiofj", 86)
+               """)
+
+cursor.execute("""
+INSERT INTO user (username, wins)
+VALUES ("ftyjk", 282)
+               """)
+
+cursor.execute("""
+INSERT INTO user (username, wins)
+VALUES ("e12e21", 34)
+               """)
+
+cursor.execute("""
+INSERT INTO user (username, wins)
+VALUES ("nfowmo", 125)
+               """)
+cursor.execute("""
+INSERT INTO user (username, wins)
+VALUES ("ocwenweo", 234)
+               """)
+
+cursor.execute("""
+INSERT INTO user (username, wins)
+VALUES ("vmwop", 25)
+               """)
+
+cursor.execute("""
+INSERT INTO user (username, wins)
+VALUES ("odneqmfiopwe", 14)
+               """)
+
+cursor.execute("""
+INSERT INTO user (username, wins)
+VALUES ("cmpiwe", 24)
+               """)
 
 cursor.execute("""
                SELECT username, wins 

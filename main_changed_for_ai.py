@@ -8,8 +8,10 @@ RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
 BLUE = (0, 0, 255)
 BLACK = (0, 0, 0)
+
+
 info = pygame.display.Info()
-screen = pygame.display.set_mode((info.current_w, info.current_h))
+screen = pygame.display.set_mode((info.current_w, info.current_h), pygame.RESIZABLE)
 font = pygame.font.SysFont("arial", 75)
 
 PLAYER_TURN = 0
@@ -186,16 +188,18 @@ class Board:
         print("")
 
     def DisplayBoard(self):
+        rect = pygame.Rect(0, 0, 100, 100)
         for column in range(self.columns):
             for row in range(self.rows):
-                pygame.draw.rect(screen, BLUE, (int(column*SQUARE_SIZE+600), int(row*SQUARE_SIZE+250), SQUARE_SIZE, SQUARE_SIZE))
-                pygame.draw.circle(screen, BLACK, (int(column*SQUARE_SIZE+650), int(row*SQUARE_SIZE+300)), RADIUS)
+                rect.center = ((info.current_w//2) - 300 + column*(SQUARE_SIZE), (info.current_h/2) - 250 + row*(SQUARE_SIZE))
+                pygame.draw.rect(screen, BLUE, rect)
+                pygame.draw.circle(screen, BLACK, ((info.current_w//2) - 300 + column*(SQUARE_SIZE), (info.current_h/2) - 250 + row*(SQUARE_SIZE)), RADIUS)
         for column in range(self.columns):
             for row in range(self.rows):        
                 if self.board[column].Fetch(row) == 1:
-                    pygame.draw.circle(screen, RED, (int(column*SQUARE_SIZE+650), info.current_h - int(row*SQUARE_SIZE+280)), RADIUS) #I don't understand why +280 here, maybe the board isn't actually centred?
+                    pygame.draw.circle(screen, RED, ((info.current_w//2) - 300 + column*(SQUARE_SIZE), (info.current_h - ((info.current_h/2) - 250 + row*(SQUARE_SIZE)))), RADIUS) #I don't understand why +280 here, maybe the board isn't actually centred?
                 elif self.board[column].Fetch(row) == 2:
-                    pygame.draw.circle(screen, YELLOW, (int(column*SQUARE_SIZE+650), info.current_h - int(row*SQUARE_SIZE+280)), RADIUS) #I don't understand why +280 here, maybe the board isn't actually centred?
+                    pygame.draw.circle(screen, YELLOW, ((info.current_w//2) - 300 + column*(SQUARE_SIZE), (info.current_h - ((info.current_h/2) - 250 + row*(SQUARE_SIZE)))), RADIUS) #I don't understand why +280 here, maybe the board isn't actually centred?
         pygame.display.update()
 
     def is_terminal_node(self):
@@ -286,27 +290,29 @@ while not game_over:
         if event.type == pygame.QUIT:
             sys.exit()
         if event.type == pygame.MOUSEMOTION:
-            pygame.draw.rect(screen, BLACK, (0, 0, info.current_w, 2.5*SQUARE_SIZE))
+            pygame.draw.rect(screen, BLACK, (0, 0, info.current_w, ((info.current_h-600)/2)))
             x_pos = event.pos[0]
             if turn == 0:
-                pygame.draw.circle(screen, RED, (x_pos, int(2*SQUARE_SIZE)), RADIUS)
+                pygame.draw.circle(screen, RED, (x_pos, (((info.current_h-600)/2)-RADIUS)), RADIUS)
             else:
-                pygame.draw.circle(screen, YELLOW, (x_pos, int(2*SQUARE_SIZE)), RADIUS)
+                pygame.draw.circle(screen, YELLOW, (x_pos, (((info.current_h-600)/2)-RADIUS)), RADIUS)
         pygame.display.update()
         if event.type == pygame.MOUSEBUTTONDOWN:
             x_pos = event.pos[0]
-            current_column = (x_pos - 600) // SQUARE_SIZE #floor division to get whole number value of column, -600 to offset the 600 pixels i added to centre the board 
+            current_column = (x_pos - ((info.current_w - 700)//2)) // SQUARE_SIZE #floor division to get whole number value of column, -600 to offset the 600 pixels i added to centre the board 
             if not board1.IsValidMove(current_column): #doesn't allow user to drop piece outside the board
                 continue
             if turn == PLAYER_TURN:
                 board1.DropPiece(current_column, 1)
                 if board1.CheckForWin(1):
                     text = font.render("Player One wins!", 1, RED)
-                    screen.blit(text, (info.current_w/3 + 80 , 50))
+                    text_rect = text.get_rect(center=(info.current_w/2, 76//2))
+                    screen.blit(text, text_rect)
                     game_over = True
                 elif board1.CheckForDraw():
                     text = font.render("DRAW!", 1, BLUE)
-                    screen.blit(text, (40, 10))
+                    text_rect = text.get_rect(center=(info.current_w/2, 76//2))
+                    screen.blit(text, text_rect)
                     game_over = True
                 turn += 1
                 turn = turn % 2
@@ -314,14 +320,16 @@ while not game_over:
                 board1.DisplayBoard()
 
     if turn == AI_TURN and not game_over:
-        board1.DropPiece(board1.minimax(board1, 2, -math.inf, math.inf, True)[0], 2)#board1.DropPiece(random.randint(0, 6), 2)
+        board1.DropPiece(board1.minimax(board1, 6, -math.inf, math.inf, True)[0], 2)#board1.DropPiece(random.randint(0, 6), 2)
         if board1.CheckForWin(2):
             text = font.render("AI Player wins!", 1, YELLOW)
-            screen.blit(text, (info.current_w/3 + 80 , 50))
+            text_rect = text.get_rect(center=(info.current_w/2, 75//2))
+            screen.blit(text, text_rect)
             game_over = True
         elif board1.CheckForDraw():
             text = font.render("DRAW!", 1, BLUE)
-            screen.blit(text, (info.current_w/2 - 100, 50))
+            text_rect = text.get_rect(center=(info.current_w/2, 75//2))
+            screen.blit(text, text_rect)
             game_over = True    
         turn += 1
         turn = turn % 2

@@ -1,4 +1,11 @@
 import pygame, sys, random, copy, math
+#Libraries used:
+#Pygame - GUI for the game, displays board and allows the user to drop pieces onto the board
+#sys - sys.exit() upon user quitting window
+#random - to randomly choose who gets first turn
+#copy - to create a deepcopy of the game board class - used to evaluate simulated game states and decide best move in Minimax algorithm
+#math - math.inf for best and -math.inf for worst possibe move in minimax
+
 #Band A:
 #Recursive Merge sort - has recursion and merge sort (implemented in leaderboard)
 #Optimisation for Minimax algorithm - aplha beta pruning which stops exploring for further moves if a bad enough score is found for a move

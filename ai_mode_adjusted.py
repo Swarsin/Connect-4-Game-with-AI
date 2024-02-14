@@ -1,4 +1,13 @@
 import pygame, sys, random, copy, math
+#Band A:
+#Recursive Merge sort - has recursion and merge sort (implemented in leaderboard)
+#Optimisation for Minimax algorithm - aplha beta pruning which stops exploring for further moves if a bad enough score is found for a move
+#Stack and Stack operations - each column in the game board is a stack, and pieces are pushed onto the stack/column
+#Complex user-define use of OOP model e.g. classes, inheritance, composition, polymorphism, interfaces
+#To Do:
+#Hashing in login screen
+#Possible Aggregate SQL Functions to display (in leaderboard screen) total games played, average wins, other details 
+#If really needed could implement MCTS as another AI Player algorithm
 
 pygame.init()
 
@@ -13,7 +22,7 @@ BLACK = (0, 0, 0)
 info = pygame.display.Info()
 screen = pygame.display.set_mode((info.current_w, info.current_h), pygame.RESIZABLE)
 font = pygame.font.SysFont("arial", 75)
-
+clock = pygame.time.Clock()
 PLAYER_TURN = 0
 AI_TURN = 1
 
@@ -22,14 +31,18 @@ EMPTY = 0
 class Stack:
     def __init__(self):
         self.items = []
+        self.pointer = 0
 
     def IsEmpty(self):
-        return self.items == []
+        return self.pointer == 0
     
     def Push(self, item):
-        self.items.append(item)
+        if len(self.items) <= self.pointer:
+            self.items += [None] * (self.pointer - len(self.items) + 1)
+        self.items[self.pointer] = item
+        self.pointer += 1
 
-    def Pop(self, item):
+    def Pop(self, item): #change this so it uses pointers - wouldn't get marks as it is right now
         if not self.IsEmpty():
             return self.items.pop(item)
         
@@ -113,18 +126,11 @@ class Board:
         if player_piece == 1:
             opponent_piece = 2 #AI_PIECE
         if window.count(player_piece) == 4:
-            score += 1000   
+            score += 100   
         elif window.count(player_piece) == 3 and window.count(EMPTY) == 1:
-            score += 10
+            score += 5
         elif window.count(player_piece) == 2 and window.count(EMPTY) == 2:
             score += 2
-        #evaluating opposing player piece:    
-        if window.count(opponent_piece) == 3 and window.count(EMPTY) == 1:
-            score -= 10
-        if window.count(opponent_piece) == 2 and window.count(EMPTY) == 2:
-            score -= 2
-        if window.count(opponent_piece) == 4:
-            score -= 1000  
         return score
         
     def ScorePosition(self, player_piece):
@@ -256,17 +262,45 @@ class Board:
             return column, value
 
 class Player:
-    def __init__(self, username, piece, colour):
+    def __init__(self, username, piece, turn, colour):
         self.username = username
         self.piece = piece
-        self.turn = 0
+        self.turn = turn
         self.colour = colour
     
-    def IncrementTurn(self):
-        self.turn += 1
+    def GetUsername(self):
+        return self.username
+    
+    def GetPiece(self):
+        return self.piece
     
     def GetTurn(self):
         return self.turn
+    
+    def SetTurn(self, new):
+        self.turn = new
+
+    def GetColour(self):
+        return self.colour
+
+class AIPlayer(Player): #Inherits from Player class but still need to implement into the actual game
+    def __init__(self, username, piece, turn, colour):
+        super().__init__(username, piece, turn, colour)
+    
+    def GetUsername(self):
+        return "AI Player"
+
+    def GetPiece(self):
+        return self.piece
+    
+    def GetTurn(self):
+        return self.turn
+    
+    def SetTurn(self, new):
+        self.turn = new
+
+    def GetColour(self):
+        return self.colour
     
     # def DropPiece(self, choice): #useless method
     #     #choice = int(input(f"{self.username}, enter the column that you want to drop your piece into>>> ")) (for CLI version of the game)
@@ -280,10 +314,9 @@ class Player:
 # class Game: # could code later, but right now I probably don't need this
 #     def __init__():
 
-
 board1 = Board()
-player1 = Player("One", 1, RED)
-player2 = Player("Two", 2, YELLOW)
+player1 = Player("One", 1, True, RED)
+player2 = Player("Two", 2, False, YELLOW)
 
 turn = random.randint(PLAYER_TURN, AI_TURN) # change depending on the user input from the customisation menu
 #board1.PrintBoard()
@@ -298,7 +331,7 @@ while not game_over:
         if event.type == pygame.MOUSEMOTION:
             pygame.draw.rect(screen, BLACK, (0, 0, info.current_w, ((info.current_h-600)/2)))
             x_pos = event.pos[0]
-            if turn == 0:
+            if player1.GetTurn():
                 pygame.draw.circle(screen, RED, (x_pos, (((info.current_h-600)/2)-RADIUS)), RADIUS)
             else:
                 pygame.draw.circle(screen, YELLOW, (x_pos, (((info.current_h-600)/2)-RADIUS)), RADIUS)
@@ -308,7 +341,7 @@ while not game_over:
             current_column = (x_pos - ((info.current_w - 700)//2)) // SQUARE_SIZE #floor division to get whole number value of column, -600 to offset the 600 pixels i added to centre the board 
             if not board1.IsValidMove(current_column): #doesn't allow user to drop piece outside the board
                 continue
-            if turn == PLAYER_TURN:
+            if player1.GetTurn():
                 board1.DropPiece(current_column, 1)
                 if board1.CheckForWin(1):
                     text = font.render("Player One wins!", 1, RED)
@@ -320,12 +353,12 @@ while not game_over:
                     text_rect = text.get_rect(center=(info.current_w/2, 76//2))
                     screen.blit(text, text_rect)
                     game_over = True
-                turn += 1
-                turn = turn % 2
+                player1.SetTurn(False)
+                player2.SetTurn(True)
                 board1.PrintBoard()
                 board1.DisplayBoard()
 
-    if turn == AI_TURN and not game_over:
+    if player2.GetTurn() and not game_over:
         board1.DropPiece(board1.minimax(board1, 6, -math.inf, math.inf, True)[0], 2)#board1.DropPiece(random.randint(0, 6), 2)
         if board1.CheckForWin(2):
             text = font.render("AI Player wins!", 1, YELLOW)
@@ -336,9 +369,9 @@ while not game_over:
             text = font.render("DRAW!", 1, BLUE)
             text_rect = text.get_rect(center=(info.current_w/2, 75//2))
             screen.blit(text, text_rect)
-            game_over = True    
-        turn += 1
-        turn = turn % 2
+            game_over = True   
+        player2.SetTurn(False)
+        player1.SetTurn(True)
         board1.PrintBoard()
         board1.DisplayBoard()
     if game_over:

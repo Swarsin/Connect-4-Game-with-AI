@@ -193,6 +193,8 @@ class Player:
 def Main_2p(player1, player2, board1):
     winner = None
     game_over = False
+    board1.DisplayBoard(player1, player2)
+    pygame.display.update()
     while not game_over:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

@@ -988,33 +988,33 @@ def update_leaderboard():
         leaderboard.add.label(str(i) + ". " + str(user[0]) + "\t\t\t\t\t\twins: " + str(user[1]))
 
 # create main menu
-main_menu = pygame_menu.Menu("Connect Four Game", info.current_w, info.current_h, theme=pygame_menu.themes.THEME_BLUE)
+main_menu = pygame_menu.Menu("Connect Four Game", info.current_w, info.current_h, theme=pygame_menu.themes.THEME_SOLARIZED)
 
 main_menu.add.button("Play game", open_options_menu)
 main_menu.add.button("Leaderboard", go_to_leaderboard)
 main_menu.add.button("Quit", quit_game)
 
 # create game options menu
-options_menu = pygame_menu.Menu("Connect Four Game Options", info.current_w, info.current_h, theme=pygame_menu.themes.THEME_BLUE)
+options_menu = pygame_menu.Menu("Connect Four Game Options", info.current_w, info.current_h, theme=pygame_menu.themes.THEME_SOLARIZED)
 
 options_menu.add.button("Login & Play with Friend", play_with_friend)
 options_menu.add.button("Play with Bot (No login)", play_with_bot)
 
 # Create leaderboard screen
-leaderboard = pygame_menu.Menu("Leaderboard", info.current_w, info.current_h, theme=pygame_menu.themes.THEME_BLUE)
+leaderboard = pygame_menu.Menu("Leaderboard", info.current_w, info.current_h, theme=pygame_menu.themes.THEME_SOLARIZED)
 
 leaderboard.add.button("Update", update_leaderboard)
 update_leaderboard()
 
 # Create login menu
-login_menu = pygame_menu.Menu("Login for Player 1", info.current_w, info.current_h, theme=pygame_menu.themes.THEME_BLUE)
+login_menu = pygame_menu.Menu("Login for Player 1", info.current_w, info.current_h, theme=pygame_menu.themes.THEME_SOLARIZED)
 username_input = login_menu.add.text_input("Username: ", maxchar=20)  # Add text input for username
 password_input = login_menu.add.text_input("Password: ", maxchar=20, password=True)  # Add password input
 login_menu.add.button("Login", login)  # add login button
 login_menu.add.button("Register", register)  # add register button
 
 
-login_menu_p2 = pygame_menu.Menu("Login for Player 2", info.current_w, info.current_h, theme=pygame_menu.themes.THEME_BLUE)
+login_menu_p2 = pygame_menu.Menu("Login for Player 2", info.current_w, info.current_h, theme=pygame_menu.themes.THEME_SOLARIZED)
 username_input_p2 = login_menu_p2.add.text_input("Username: ", maxchar=20)  # Add text input for username
 password_input_p2 = login_menu_p2.add.text_input("Password: ", maxchar=20, password=True)  # Add password input
 login_menu_p2.add.button("Login", login_p2)  # add login button
@@ -1023,7 +1023,7 @@ login_menu_p2.add.label("Player 1 logged in successfully!")
 
 
 # Create a Pygame Menu
-customise_menu = pygame_menu.Menu("Customise Game", info.current_w, info.current_h, theme=pygame_menu.themes.THEME_BLUE)
+customise_menu = pygame_menu.Menu("Customise Game", info.current_w, info.current_h, theme=pygame_menu.themes.THEME_SOLARIZED)
 
 # Add four drop-down lists
 drop_down1_choices = [
@@ -1062,7 +1062,7 @@ drop_down4 = customise_menu.add.dropselect("First Move: ", drop_down4_choices, o
 # Add a "Play" button to trigger the start_ai_game function
 play = customise_menu.add.button("Play", start_ai_game)
 
-customise_2p = pygame_menu.Menu("2P Customise", info.current_w, info.current_h, theme=pygame_menu.themes.THEME_BLUE)
+customise_2p = pygame_menu.Menu("2P Customise", info.current_w, info.current_h, theme=pygame_menu.themes.THEME_SOLARIZED)
 
 customise_2p.add.label("Both players logged in successfully!")
 

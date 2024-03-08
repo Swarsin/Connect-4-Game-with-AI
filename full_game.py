@@ -451,13 +451,13 @@ class MCTS:
         if node is not None:
             node.total_games += 1
             node.wins += score
-            self.Backpropagate(node.parent, turn, outcome)
 
-            if outcome is None:  # For DRAW
-                score = 0
+            if outcome is None:
+                score += 0
             else:
                 score = 1 - score
 
+            self.Backpropagate(node.parent, turn, outcome)
 
     def Search(self, time_limit):
         start_time = time.process_time()

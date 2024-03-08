@@ -20,6 +20,12 @@ To do:
 How to play:
 
 Download compressed files
+
+
 Extract files
+
+
 open the extracted folder in an IDE
+
+
 run full_game.py

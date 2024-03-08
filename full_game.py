@@ -91,9 +91,8 @@ class Stack:
             return None  # or raise an exception for an empty stack
         else:
             self.pointer -= 1  # decrement pointer after popping an item
-            self.items[self.pointer] = 0
+            self.items = self.items[:self.pointer]
             
-        
     def Peek(self):
         if not self.IsEmpty():
             return self.items[-1]
@@ -104,17 +103,14 @@ class Stack:
         else:
             return 0
         
-    def FetchAll(self): #returns copy of entire stack object - doesn't affect original
-        return self.items.copy
-        
     def GetSize(self):
         return len(self.items)
     
-    def __str__(self): #for testing/debugging
-        return str(self.items)
+    # def __str__(self): #for testing/debugging
+    #     return str(self.items)
     
-    def __repr__(self): #for testing/debugging
-        return str(self.items)
+    # def __repr__(self): #for testing/debugging
+    #     return str(self.items)
 
 class Board:
     def __init__(self):
@@ -324,9 +320,13 @@ class Board:
         self.moves_history.append(move)
         
     def Undo(self):
-        for i in range(2):
+        for _ in range(2):
             last_move = self.moves_history.pop(-1)
             self.board[last_move].Pop()
+            # print(f"Length: {self.board[last_move].GetSize()}")
+            # print(f"Length: {self.board[last_move+1].GetSize()}")
+            # print(f"is valid: {self.IsValidMove(last_move)}")
+            # self.PrintBoard()
 
 class Player:
     def __init__(self, piece, turn, colour, username):
@@ -380,31 +380,35 @@ class Node:
         self.wins = 0 #total games won after this move
         self.total_games = 0 #total games played using this move
         self.children = [] #children of this node
-        self.result = 0 #who won
 
-    def CreateChildren(self, children):
-        for child in children:
-            self.children.append(child)
+    def SetChildren(self, children):
+        self.children = children
 
-    def GetUCTValue(self, explore : float = 2):
+    def GetUCTValue(self):
+        explore = math.sqrt(2)
         if self.total_games == 0:
-            return 0 if explore == 0 else math.inf
+            if explore == 0:
+                return 0
+            else:
+                return math.inf
         else:
-            return self.wins / self.total_games + explore * math.sqrt(math.log(self.parent.total_games) / self.total_games)
+            expolitation_term =  self.wins / self.total_games
+            exploration_term = explore * math.sqrt(math.log(self.parent.total_games) / self.total_games)
+            uct = expolitation_term + exploration_term
+            return uct
 
 class MCTS:
     def __init__(self, current_board, player1, player2):
         self.root_state = copy.deepcopy(current_board)
-        self.root = Node(None, None)
-        self.run_time = 0
-        self.node_count = 0
-        self.simulations = 0
         self.player1 = copy.deepcopy(player1)
         self.player2 = copy.deepcopy(player2)
+        self.root = Node(None, None)
+        self.node_count = 0
+        self.simulations = 0
+        self.run_time = 0
 
     def Select(self):
-        node = self.root
-        state = copy.deepcopy(self.root_state)
+        node, state = self.root, copy.deepcopy(self.root_state)
 
         while len(node.children) != 0:
             children = node.children
@@ -428,7 +432,7 @@ class MCTS:
             return False
         
         children = [Node(move, parent) for move in state.GetValidMoves()]
-        parent.CreateChildren(children)
+        parent.SetChildren(children)
 
         return True
     
@@ -439,16 +443,21 @@ class MCTS:
         return (self.player1.GetPiece() if state.CheckForWin(self.player1.GetPiece()) else self.player2.GetPiece() if state.CheckForWin(self.player2.GetPiece()) else None)
     
     def Backpropagate(self, node, turn, outcome):
-        reward = 0 if outcome == turn else 1
+        if outcome == turn:
+            score = 0
+        else:
+            score = 1
 
-        while node is not None:
+        if node is not None:
             node.total_games += 1
-            node.wins += reward
-            node = node.parent
-            if outcome == None: #For DRAW
-                reward = 0
+            node.wins += score
+            self.Backpropagate(node.parent, turn, outcome)
+
+            if outcome is None:  # For DRAW
+                score = 0
             else:
-                reward = 1 - reward
+                score = 1 - score
+
 
     def Search(self, time_limit):
         start_time = time.process_time()
@@ -468,11 +477,12 @@ class MCTS:
     def GetBestMove(self):
         if self.root_state.is_terminal_node():
             return -1
-        max_value = max(self.root.children, key=lambda x: x.total_games).total_games
-        max_nodes = [x for x in self.root.children if x.total_games == max_value]
-        best_child = random.choice(max_nodes)
-        print(best_child.move)
-        return best_child.move
+        else:
+            max_value = max(self.root.children, key=lambda x: x.total_games).total_games
+            max_nodes = [x for x in self.root.children if x.total_games == max_value]
+            best_child = random.choice(max_nodes)
+            print(best_child.move)
+            return best_child.move
     
     def UpdateMove(self, move):
         if move in self.root.children:
@@ -481,9 +491,6 @@ class MCTS:
         
         self.root_state.SimulateMove(move, self.player1, self.player2)
         self.root = Node(None, None)
-    
-    def GetStatistics(self):
-        return self.run_time, self.simulations
 
 def Main_2p(player1, player2, board1):
     winner = None
@@ -702,7 +709,6 @@ def MainMCTS(player1, player2, board1, mcts_obj):
                     board1.DropPiece(ai_move, 2)
                     mcts_obj.UpdateMove(ai_move)
                     board1.Store(ai_move)
-                    print(mcts_obj.GetStatistics())
                     if board1.CheckForWin(player2.GetPiece()):
                         text = font.render("AI Player wins!", 1, player2.GetColour())
                         text_rect = text.get_rect(center=(info.current_w/2, 75//2))
@@ -725,21 +731,21 @@ def MainMCTS(player1, player2, board1, mcts_obj):
 #FROM HERE, CODE FOR MENU
 def secure_password(password):
     min_length = 8
-    has_uppercase = False
-    has_lowercase = False
-    has_digit = False
+    uppercase = 0
+    lowercase = 0
+    digit = 0
 
     # Check each character in the password
     for char in password:
         if 'A' <= char <= 'Z':
-            has_uppercase = True
+            uppercase += 1
         elif 'a' <= char <= 'z':
-            has_lowercase = True
+            lowercase += 1
         elif '0' <= char <= '9':
-            has_digit = True
+            digit += 1
 
     # Check if the password meets the criteria
-    if len(password) >= min_length and has_uppercase and has_lowercase and has_digit:
+    if len(password) >= min_length and (uppercase + lowercase + digit >= 8 and (uppercase >= 1 and lowercase >= 1 and digit >= 1)):
         return True
     else:
         return False
@@ -871,7 +877,7 @@ def register():
     
     registered_successfully = "User successfully registered!"
     already_registered = "User has already been registered, please log-in instead!"
-    weak_password = "Password must have number, capitals, and lowercase letters!"
+    weak_password = "Password must be at least 8 characters, and have number, capital, and lowercase letters!"
     widget_titles = [widget.get_title() for widget in login_menu.get_widgets()]
 
     if result != []:
@@ -893,7 +899,7 @@ def register_p2():
     
     registered_successfully = "User successfully registered!"
     already_registered = "User has already been registered, please log-in instead!"
-    weak_password = "Password must have number, capitals, and lowercase letters!"
+    weak_password = "Password must be at least 8 characters, and have number, capital, and lowercase letters!"
     widget_titles = [widget.get_title() for widget in login_menu_p2.get_widgets()]
 
     if result != []:
@@ -1027,7 +1033,7 @@ customise_menu = pygame_menu.Menu("Customise Game", info.current_w, info.current
 
 # Add four drop-down lists
 drop_down1_choices = [
-    ("Easiest (MCTS)", 5),
+    ("Easiest (MCTS)", 10),
     ("Easier (Minimax)", 1),
     ("Easy (Minimax)", 2),
     ("Medium (Minimax)", 4),

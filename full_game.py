@@ -5,7 +5,6 @@ pygame.init()
 info = pygame.display.Info()
 screen = pygame.display.set_mode((info.current_w, info.current_h))
 font = pygame.font.SysFont("arial", 75)
-clock = pygame.time.Clock()
 
 played_ai = False
 played_2p = False
@@ -13,8 +12,6 @@ played_2p = False
 EMPTY = 0
 SQUARE_SIZE = 100
 RADIUS = int(SQUARE_SIZE/2 - 10)
-RED = (255, 0, 0)
-YELLOW = (255, 255, 0)
 BLUE = (0, 0, 255)
 BLACK = (0, 0, 0)
 

@@ -14,7 +14,8 @@ Done:
 - made a functional, but not great ai bot using MCTS
 
 To do:
-- testing
+- Testing
+- Make MCTS bot better
 
 
 

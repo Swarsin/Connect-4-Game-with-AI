@@ -350,7 +350,7 @@ class Player:
     def GetColour(self):
         return self.colour
 
-class AIPlayer(Player): #Inherits from Player class but still need to implement into the actual game
+class AIPlayer(Player): #Inherits from Player class 
     def __init__(self, piece, turn, colour, difficulty):
         super().__init__(piece, turn, colour, username="")
         self.difficulty = difficulty
@@ -532,12 +532,14 @@ def Main_2p(player1, player2, board1):
                     board1.DropPiece(current_column, player1.GetPiece())
                     board1.Store(current_column)
                     if board1.CheckForWin(player1.GetPiece()):
+                        pygame.draw.rect(screen, BLACK, (0, 0, info.current_w, ((info.current_h-600)/2)))
                         text = font.render(f"{player1.GetUsername()} won!", 1, player1.GetColour())
                         text_rect = text.get_rect(center=(info.current_w/2, 76//2))
                         screen.blit(text, text_rect)
                         game_over = True
                         winner = player1.GetUsername()
                     elif board1.CheckForDraw():
+                        pygame.draw.rect(screen, BLACK, (0, 0, info.current_w, ((info.current_h-600)/2)))
                         text = font.render("DRAW!", 1, (255, 255, 255))
                         text_rect = text.get_rect(center=(info.current_w/2, 76//2))
                         screen.blit(text, text_rect)
@@ -551,12 +553,14 @@ def Main_2p(player1, player2, board1):
                     board1.DropPiece(current_column, player2.GetPiece())
                     board1.Store(current_column)
                     if board1.CheckForWin(player2.GetPiece()):
+                        pygame.draw.rect(screen, BLACK, (0, 0, info.current_w, ((info.current_h-600)/2)))
                         text = font.render(f"{player2.GetUsername()} won!", 1, player2.GetColour())
                         text_rect = text.get_rect(center=(info.current_w/2, 75//2))
                         screen.blit(text, text_rect)
                         game_over = True
                         winner = player2.GetUsername()
                     elif board1.CheckForDraw():
+                        pygame.draw.rect(screen, BLACK, (0, 0, info.current_w, ((info.current_h-600)/2)))
                         text = font.render("DRAW!", 1, (255, 255, 255))
                         text_rect = text.get_rect(center=(info.current_w/2, 75//2))
                         screen.blit(text, text_rect)
@@ -567,7 +571,7 @@ def Main_2p(player1, player2, board1):
                 board1.DisplayBoard(player1, player2)
                 if game_over:
                     pygame.event.set_allowed(pygame.MOUSEBUTTONDOWN) 
-                    pygame.time.wait(5000)
+                    pygame.time.wait(3000)
                     return winner
 
 def Main(player1, player2, board1):
@@ -609,11 +613,13 @@ def Main(player1, player2, board1):
                         board1.DropPiece(current_column, player1.GetPiece())
                         board1.Store(current_column)
                         if board1.CheckForWin(player1.GetPiece()):
+                            pygame.draw.rect(screen, BLACK, (0, 0, info.current_w, ((info.current_h-600)/2)))
                             text = font.render("Player One won!", 1, player1.GetColour())
                             text_rect = text.get_rect(center=(info.current_w/2, 76//2))
                             screen.blit(text, text_rect)
                             game_over = True
                         elif board1.CheckForDraw():
+                            pygame.draw.rect(screen, BLACK, (0, 0, info.current_w, ((info.current_h-600)/2)))
                             text = font.render("DRAW!", 1, (255, 255, 255))
                             text_rect = text.get_rect(center=(info.current_w/2, 76//2))
                             screen.blit(text, text_rect)
@@ -630,11 +636,13 @@ def Main(player1, player2, board1):
                     board1.DropPiece(ai_move, 2)#board1.DropPiece(random.randint(0, 6), 2)
                     board1.Store(ai_move)
                     if board1.CheckForWin(player2.GetPiece()):
+                        pygame.draw.rect(screen, BLACK, (0, 0, info.current_w, ((info.current_h-600)/2)))
                         text = font.render("AI Player won!", 1, player2.GetColour())
                         text_rect = text.get_rect(center=(info.current_w/2, 75//2))
                         screen.blit(text, text_rect)
                         game_over = True
                     elif board1.CheckForDraw():
+                        pygame.draw.rect(screen, BLACK, (0, 0, info.current_w, ((info.current_h-600)/2)))
                         text = font.render("DRAW!", 1, (255, 255, 255))
                         text_rect = text.get_rect(center=(info.current_w/2, 75//2))
                         screen.blit(text, text_rect)
@@ -645,7 +653,7 @@ def Main(player1, player2, board1):
                     board1.DisplayBoard(player1, player2)
                 if game_over:
                     pygame.event.set_allowed(pygame.MOUSEBUTTONDOWN)  
-                    pygame.time.wait(5000)
+                    pygame.time.wait(3000)
 
 def MainMCTS(player1, player2, board1, mcts_obj):
     game_over = False
@@ -687,11 +695,13 @@ def MainMCTS(player1, player2, board1, mcts_obj):
                         mcts_obj.UpdateMove(current_column)
                         board1.Store(current_column)
                         if board1.CheckForWin(player1.GetPiece()):
+                            pygame.draw.rect(screen, BLACK, (0, 0, info.current_w, ((info.current_h-600)/2)))
                             text = font.render("Player One wins!", 1, player1.GetColour())
                             text_rect = text.get_rect(center=(info.current_w/2, 76//2))
                             screen.blit(text, text_rect)
                             game_over = True
                         elif board1.CheckForDraw():
+                            pygame.draw.rect(screen, BLACK, (0, 0, info.current_w, ((info.current_h-600)/2)))
                             text = font.render("DRAW!", 1, (255, 255, 255))
                             text_rect = text.get_rect(center=(info.current_w/2, 76//2))
                             screen.blit(text, text_rect)
@@ -710,11 +720,13 @@ def MainMCTS(player1, player2, board1, mcts_obj):
                     mcts_obj.UpdateMove(ai_move)
                     board1.Store(ai_move)
                     if board1.CheckForWin(player2.GetPiece()):
+                        pygame.draw.rect(screen, BLACK, (0, 0, info.current_w, ((info.current_h-600)/2)))
                         text = font.render("AI Player wins!", 1, player2.GetColour())
                         text_rect = text.get_rect(center=(info.current_w/2, 75//2))
                         screen.blit(text, text_rect)
                         game_over = True
                     elif board1.CheckForDraw():
+                        pygame.draw.rect(screen, BLACK, (0, 0, info.current_w, ((info.current_h-600)/2)))
                         text = font.render("DRAW!", 1, (255, 255, 255))
                         text_rect = text.get_rect(center=(info.current_w/2, 75//2))
                         screen.blit(text, text_rect)
@@ -725,7 +737,7 @@ def MainMCTS(player1, player2, board1, mcts_obj):
                     board1.DisplayBoard(player1, player2)
                 if game_over:
                     pygame.event.set_allowed(pygame.MOUSEBUTTONDOWN) 
-                    pygame.time.wait(5000)
+                    pygame.time.wait(3000)
 
 
 #FROM HERE, CODE FOR MENU
@@ -834,6 +846,9 @@ def login():
         if pwd == result[0][2]:
             #go to next screen
             #print("Go to next screen")
+            for widget in login_menu.get_widgets():
+                if widget.get_title() == user_not_found or widget.get_title() == wrong_combo:
+                    login_menu.remove_widget(widget)
             main_menu._open(login_menu_p2)
             return (user, pwd)
         else:
@@ -863,6 +878,9 @@ def login_p2():
         if pwd == result[0][2]:
             #go to next screen
             #print("Go to next screen")
+            for widget in login_menu_p2.get_widgets():
+                if widget.get_title() == user_not_found or widget.get_title() == wrong_combo or widget.get_title() == double_login:
+                    login_menu_p2.remove_widget(widget)
             main_menu._open(customise_2p)
             return (user, pwd)
         else:
@@ -923,7 +941,6 @@ def start_ai_game():
 
     try:
         selected_value1 = drop_down1.get_value()  # get_value() returns the user choice as a tuple (since that's how it's defined in the code) with the index of the selected choice in the corresponding choices array
-        print(selected_value1)
         selected_value2 = drop_down2.get_value()  # example: (('Hard', 4), 3), (('Green', (0, 255, 0)), 1), (('Blue', (0, 0, 255)), 2), (('Player 1', 1), 0)
         selected_value3 = drop_down3.get_value()
         selected_value4 = drop_down4.get_value()
@@ -933,6 +950,9 @@ def start_ai_game():
         board = Board()
         human_player = Player(1, True if selected_value4[0][1] == 1 else False, selected_value2[0][1], "You")
         ai_player = AIPlayer(2, False if selected_value4[0][1] == 1 else True, selected_value3[0][1], selected_value1[0][1])
+        for widget in customise_menu.get_widgets():
+            if widget.get_title() == missing_options or widget.get_title() == same_colour:
+                customise_menu.remove_widget(widget)
         main_menu.disable()
         screen.fill((0, 0, 0))
         if selected_value1[1] == 0:
@@ -967,6 +987,9 @@ def start_2p_game():
         board = Board()
         player_one = Player(1, True if selected_value3[0][1] == 1 else False, selected_value1[0][1], p1_details[0])
         player_two = Player(2, False if selected_value3[0][1] == 1 else True, selected_value2[0][1], p2_details[0])
+        for widget in customise_2p.get_widgets():
+            if widget.get_title() == missing_options or widget.get_title() == same_colour:
+                customise_2p.remove_widget(widget)
         main_menu.disable()
         screen.fill((0, 0, 0))
         winner = Main_2p(player_one, player_two, board)
@@ -975,10 +998,10 @@ def start_2p_game():
         main_menu.enable()
     except ValueError:
         if missing_options not in widget_titles:
-            customise_2p.add.label(missing_options)
+            missing_options_widget = customise_2p.add.label(missing_options)
     except NameError:
         if same_colour not in widget_titles:
-            customise_2p.add.label(same_colour)
+            same_colour_widget = customise_2p.add.label(same_colour)
 
 def remove_all_widgets(menu):
     for widget in menu.get_widgets():

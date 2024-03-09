@@ -1053,7 +1053,7 @@ customise_menu = pygame_menu.Menu("Customise Game", info.current_w, info.current
 
 # Add four drop-down lists
 drop_down1_choices = [
-    ("Easiest (MCTS)", 10),
+    ("Easiest (MCTS)", 5),
     ("Easier (Minimax)", 1),
     ("Easy (Minimax)", 2),
     ("Medium (Minimax)", 4),

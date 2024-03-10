@@ -110,7 +110,6 @@ class Board: #board class for the game - contains most of the functions used in 
         self.rows = 6 #number of rows in the board (typical game board is 6x7)
         self.columns = 7 #number of columns in the board (typical game board is 6x7)
         self.board = [Stack() for column in range(self.columns)] #uses composition - creating more complex objects (board) by combining simpler ones(stack) - also if the board class is scrapped, the stacks would be destroyed too as the form an integral part of the board. 
-        self.full_columns = [] #list of full columns, used to check if the board is full (game over) and to check for valid moves
         self.window_length = 4 #length of the window in the evaluation function
         self.moves_history = [] #list of moves - used to undo moves
     
@@ -217,13 +216,13 @@ class Board: #board class for the game - contains most of the functions used in 
         return score
     
     def CheckForDraw(self):
+        full = 0 #represents number of full columns found so far
         for column in range(self.columns): #checks each column to see if it is full
             if self.board[column].GetSize() == 6:
-                if column not in self.full_columns:
-                    self.full_columns.append(column) #adds the full column to the list of full columns
-        if len(self.full_columns) == 7: #checks if all 7 columns are full
-            return True #game is a draw
-        return False #game is not a draw
+                full += 1 #if full column found, add 1 to full
+        if full == 7: #if all columns are full, return True
+            return True
+        return False #otherwise, return False
         
 
     def PrintBoard(self): #displays on terminal - for original testing before GUI

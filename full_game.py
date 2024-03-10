@@ -716,7 +716,7 @@ def MainMCTS(player1, player2, board1, mcts_obj):
 
 #FROM HERE, CODE FOR MENU
 def secure_password(password):
-    min_length =  # Minimum length of the password
+    min_length = 8 # Minimum length of the password
     uppercase = 0 # Number of uppercase letters in the password
     lowercase = 0 # Number of lowercase letters in the password
     digit = 0 # Number of digits in the password
@@ -735,30 +735,52 @@ def secure_password(password):
         return True #return True if it does
     else:
         return False #False if it doesn't
-
-def search_user(user_id): #search for a user in the database with the given user_id
+    
+def add_user(username, password, user_id):
     try:
-        conn = sqlite3.connect("c4db.db")
-        cursor = conn.cursor()
-        with conn:
-            cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
-            result = cursor.fetchall()
-        return result #and return the result
-    except Exception as error: #catch any errors
-        print(error)
-    finally:
-        conn.close()
+        conn = sqlite3.connect("c4db.db") #Connect to the database
+        cursor = conn.cursor() #Create a cursor object
 
-def add_user(username, password, user_id): #add a new user to the database with the given username, password, and user_id
-    try:
-        conn = sqlite3.connect("c4db.db")
-        cursor = conn.cursor()
+        # Check if user_id already exists
+        cursor.execute("SELECT * FROM users WHERE id=?", (user_id,))
+        user = cursor.fetchone()
+
+        # If user_id already exists, find the next available location
+        while user:
+            user_id += 1
+            cursor.execute("SELECT * FROM users WHERE id=?", (user_id,))
+            user = cursor.fetchone()
+
+        # Insert the new user
         with conn:
             cursor.execute("INSERT INTO users VALUES (?, ?, ?, 0)", (user_id, username, password))
+            
     except Exception as error: #catch any errors
         print(error)
     finally:
+        conn.close() #Close the connection
+
+
+def search_user(user_id, username):
+    try:
+        conn = sqlite3.connect("c4db.db") #Connect to the database
+        cursor = conn.cursor() #Create a cursor object
+
+        # Check if user_id already exists
+        cursor.execute("SELECT * FROM users WHERE id=?", (user_id,))
+        user = cursor.fetchone()
+
+        # If user_id already exists, find the next available location
+        while user[1] != username:
+            user_id += 1
+            cursor.execute("SELECT * FROM users WHERE id=?", (user_id,))
+            user = cursor.fetchone()
+        return user
+    except Exception as error:
+        print(error)
+    finally:
         conn.close()
+
 
 def update_score(username): #update the score of a user in the database using their username
     try:
@@ -798,18 +820,18 @@ def login():
     user = username_input.get_value() #get username from the username input widget in the login menu
     pwd = password_input.get_value() #get password from the password input widget in the login menu
     id = hash_function(user) #hash the username
-    result = search_user(id) #search for the user in the database
+    result = search_user(id, user) #search for the user in the database
 
     user_not_found = "User not found!" #message to display if user is not found
     wrong_combo = "Incorrect username or password!" #message to display if username or password is incorrect
     widget_titles = [widget.get_title() for widget in login_menu.get_widgets()] #get the titles of the widgets in the login menu
 
-    if result == []: #if user is not found
+    if result == None: #if user is not found
         if user_not_found not in widget_titles: #add the message to the login menu if it is not already there
             login_menu.add.label(user_not_found)
     else:
         #CHECK PASSWORD AND IF CORRECT GO TO NEXT SCREEN
-        if pwd == result[0][2]:
+        if pwd == result[2]:
             for widget in login_menu.get_widgets(): #remove the error messages from the login menu if they are there
                 if widget.get_title() == user_not_found or widget.get_title() == wrong_combo:
                     login_menu.remove_widget(widget)
@@ -823,7 +845,7 @@ def login_p2():
     user = username_input_p2.get_value() #get username from the username input widget in the second login menu
     pwd = password_input_p2.get_value() #get password from the password input widget in the second login menu
     id = hash_function(user) #hash the username of the second player
-    result = search_user(id) #search for the user in the database
+    result = search_user(id, user) #search for the user in the database
     previous_user_details = login() #get the details of the previous player
 
     double_login = "User already logged in!" #message to display if user is already logged in
@@ -834,12 +856,12 @@ def login_p2():
     if previous_user_details[0] == user: #if user is already logged in
         if double_login not in widget_titles: #add the message to the second login menu if it is not already there
             login_menu_p2.add.label(double_login)
-    elif result == []: #if user is not found
+    elif result == None: #if user is not found
         if user_not_found not in widget_titles: #add the message to the second login menu if it is not already there
             login_menu_p2.add.label(user_not_found)
     else:
         #CHECK PASSWORD AND IF CORRECT GO TO NEXT SCREEN
-        if pwd == result[0][2]:
+        if pwd == result[2]:
             for widget in login_menu_p2.get_widgets(): #remove the error messages from the second login menu if they are there
                 if widget.get_title() == user_not_found or widget.get_title() == wrong_combo or widget.get_title() == double_login:
                     login_menu_p2.remove_widget(widget)
@@ -853,14 +875,14 @@ def register():
     user = username_input.get_value() #get username from the username input widget in the login menu
     pwd = password_input.get_value() #get password from the password input widget in the login menu
     id = hash_function(user) #hash the username
-    result = search_user(id) #search for the user in the database
+    result = search_user(id, user) #search for the user in the 
     
     registered_successfully = "User successfully registered!" #message to display if user is registered successfully
     already_registered = "User has already been registered, please log-in instead!" #message to display if user is already registered
     weak_password = "Password must be at least 8 characters, and have number, capital, and lowercase letters!" #message to display if password is weak
     widget_titles = [widget.get_title() for widget in login_menu.get_widgets()] #get the titles of the widgets in the login menu
 
-    if result != []: #if user is already registered
+    if result != None: #if user is already registered
         if already_registered not in widget_titles: #add the message to the login menu if it is not already there
             login_menu.add.label(already_registered)
     elif secure_password(pwd):#if password is secure
@@ -875,14 +897,14 @@ def register_p2():
     user = username_input_p2.get_value() #get username from the username input widget in the second login menu
     pwd = password_input_p2.get_value() #get password from the password input widget in the second login menu
     id = hash_function(user) #hash the username
-    result = search_user(id) #search for the user in the database
+    result = search_user(id, user) #search for the user in the database
     
     registered_successfully = "User successfully registered!" #message to display if user is registered successfully
     already_registered = "User has already been registered, please log-in instead!" #message to display if user is already registered
     weak_password = "Password must be at least 8 characters, and have number, capital, and lowercase letters!" #message to display if password is weak
     widget_titles = [widget.get_title() for widget in login_menu_p2.get_widgets()] #get the titles of the widgets in the second login menu
 
-    if result != []: #if user is already registered
+    if result != None: #if user is already registered
         if already_registered not in widget_titles:#add the message to the second login menu if it is not already there
             login_menu_p2.add.label(already_registered)
     elif secure_password(pwd): #if password is secure
@@ -923,9 +945,11 @@ def start_ai_game():
         else:
             Main(human_player, ai_player, board) #start the normal minimax game
         main_menu.enable() #enable the main menu when done with the game
+    
     except ValueError: #if the user does not select an option
         if missing_options not in widget_titles: #add the missing options message to the customise menu if it is not already there
             customise_menu.add.label(missing_options)
+    
     except NameError: #if both players choose the same colour
         if same_colour not in widget_titles: #add the same colour message to the customise menu if it is not already there
             customise_menu.add.label(same_colour)

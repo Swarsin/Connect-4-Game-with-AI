@@ -1,5 +1,27 @@
 import random, sys, copy, math, time, sqlite3, pygame, pygame_menu
 
+#Libraries used:
+#random - To randomly choose who gets first turn, to select random moves, etc.
+#sys - sys.exit() upon user quitting window
+#copy - to create deep copies of the game board class - used to evaluate simulated game states and decide best move in Minimax algorithm, to creata a deepcopy of the player objects in MCTS, etc.
+#math - math.inf and -math.inf for initial value of moves in minimax, used for finding UCT Value of nodes using Upper Confidence Bound applied to Trees (UCT) formula
+#time - to limit MCTS to run over a certain time period when calcualting best move
+#sqlite3 - used to connect to the database and validate username and password, to add users to the database, to update scores in the database, etc.
+#pygame - Used to run the Connect 4 Game - Displays game board, allows the user to drop pieces onto the board, updates board, displays win/draw messages  
+#pygame_menu - used to display the menu system, also based on pygame, so fits perfectly into the Connect 4 Game, which also uses pygame.
+
+#Band A:
+#Stack -  used to represent each column in the game board, and pieces are pushed onto the stack and popped from the stack (Lines 94-128)
+#Stack operations - each column in the game board is a stack, and pieces are pushed onto the stack and popped from the stack (Lines 94-128)
+#Tree - used to implement MCTS algorithm for AI Player - stores root node, with parent nodes and child nodes - representing moves in the game (Lines 409-427, 444-459)
+#Tree Traversal - AI player -  explores tree using MCTS (Lines 461-471)
+#Complex Mathematical model - used to evaluate UCT Value of nodes using Upper Confidence Bound applied to Trees (UCT) formula (Line 387-398)
+#Complex user-defined use of object-orientated programming (OOP) model - classes (Lines 94-128, 130-329, 331-351, 353-374, 376-398, 400-488), inheritance (Lines 353-374), overriding (Line 358), composition (Line 134, Line 403-405) 
+#Hashing - login screen - used to validate username and password and access records in the database (Lines 760-782, 785-805, 835-858)
+#Recursive algorithm - merge sort, minimax algorithm, backpropagation in MCTS, etc. (Lines 40-74, 275-317, 444-459)
+#Optimisation - Minimax algorithm with alpha beta pruning and MCTS, identifying best move given a certain board state (Lines 275-317, 376-488)
+#Merge Sort - used to sort the leaderboard (Lines 40-74)
+
 pygame.init() #initialise pygame
 
 info = pygame.display.Info() #get display info - used to set the size of the window
@@ -9,47 +31,47 @@ font = pygame.font.SysFont("arial", 75) #set font of text to be used in the game
 played_ai = False #used to check if the ai game has been played
 played_2p = False #used to check if the two player game has been played
 
-EMPTY = 0 #empty space in the board
 SQUARE_SIZE = 100 #size of each square of the board which contain the pieces
 RADIUS = int(SQUARE_SIZE/2 - 10) #radius of the circle in the middle of the square
 BLUE = (0, 0, 255) #colour of the squares in the game board
 BLACK = (0, 0, 0) #colour of the circles (denotes empty space in the game board)
+EMPTY = 0 #empty space in the board
 
-def merge_sort(arr, wins=lambda x: x[1]): #used to sort the leaderboard
-    if len(arr) < 2: #base case
-        return arr
+def merge_sort(array, wins=lambda x: x[1]): #used to sort the leaderboard
+    if len(array) <= 1: #base case
+        return array
 
-    mid = len(arr) // 2 #split the array in half
-    left = arr[:mid] #left half of the array
-    right = arr[mid:] #right half of the arra
+    mid = len(array) // 2 #split the array in half
+    left = array[:mid] #left half of the array
+    right = array[mid:] #right half of the arra
 
     merge_sort(left, wins) #recursively sort the left half
     merge_sort(right, wins) #recursively sort the right half
 
-    i = 0 #index for the left array 
-    j = 0 #index for the right array
-    k = 0 #index for the main array
+    left_index = 0 #index for the left array 
+    right_index = 0 #index for the right array
+    array_index = 0 #index for the main array
     
-    while i < len(left) and j < len(right): #while there are elements in the left and right arrays
-        if wins(left[i]) > wins(right[j]): #if the current element in the left array is greater than the corresponding in the right array, add it to the main array
-            arr[k] = left[i] #add it to the main array
-            i += 1 #increment the index of the left array
+    while left_index < len(left) and right_index < len(right): #while there are elements in the left and right arrays
+        if wins(left[left_index]) > wins(right[right_index]): #if the current element in the left array is greater than the corresponding in the right array, add it to the main array
+            array[array_index] = left[left_index] #add it to the main array
+            left_index += 1 #increment the index of the left array
         else:
-            arr[k] = right[j] #else (bigger in right array) add it to the main array
-            j += 1 #increment the index of the right array
-        k += 1 #increment the index of the main array
+            array[array_index] = right[right_index] #else (bigger in right array) add it to the main array
+            right_index += 1 #increment the index of the right array
+        array_index += 1 #increment the index of the main array
 
-    while i < len(left): #copies remaining element from the left array into the main array
-        arr[k] = left[i] #add it to the main array
-        i += 1 #increment the index of the left array
-        k += 1 #increment the index of the main array
+    while left_index < len(left): #copies remaining element from the left array into the main array
+        array[array_index] = left[left_index] #add it to the main array
+        left_index += 1 #increment the index of the left array
+        array_index += 1 #increment the index of the main array
 
-    while j < len(right): #copies any remaining elements from the right array into the main array
-        arr[k] = right[j] #add it to the main array
-        j += 1 #increment the index of the right array
-        k += 1 #increment the index of the main array
+    while right_index < len(right): #copies any remaining elements from the right array into the main array
+        array[array_index] = right[right_index] #add it to the main array
+        right_index += 1 #increment the index of the right array
+        array_index += 1 #increment the index of the main array
 
-    return arr #returns the sorted array
+    return array #returns the sorted array
 
 def GetList(): #used to get the fields of information that will be be displayed in the leaderboard
     try:
@@ -281,7 +303,7 @@ class Board: #board class for the game - contains most of the functions used in 
         
         else: #for minimising player
             value = math.inf #set the initial value to the highest possible score - as we're finding the best score for player 1, this should hopefully be changed later when a better score (large negative) is found (move is beneficial to player 1)
-            column = random.choice(valid_moves) #choose a random column from the valid moves - just a placeholder
+            column = random.choice(valid_moves) #hoose a random column from the valid moves - just a placeholder
             for move in valid_moves: #for column in valid columns
                 temp_board = copy.deepcopy(board) # Create a temporary board as a copy of the current board
                 temp_board.DropPiece(move, 1) # Drop a piece for player 1 in the temporary board

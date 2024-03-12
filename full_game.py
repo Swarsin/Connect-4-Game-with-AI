@@ -320,13 +320,16 @@ class Board: #board class for the game - contains most of the functions used in 
         self.moves_history.append(move)
         
     def Undo(self): #undo the last 2 moves
-        for _ in range(2):
-            last_move = self.moves_history.pop(-1) #remove and return the last move from the moves_history list
-            self.board[last_move].Pop() #remove the last move from the board
-            # print(f"Length: {self.board[last_move].GetSize()}")
-            # print(f"Length: {self.board[last_move+1].GetSize()}")
-            # print(f"is valid: {self.IsValidMove(last_move)}")
-            # self.PrintBoard()
+        if len(self.moves_history) < 2:
+            pass
+        else:
+            for _ in range(2):
+                last_move = self.moves_history.pop(-1) #remove and return the last move from the moves_history list
+                self.board[last_move].Pop() #remove the last move from the board
+                # print(f"Length: {self.board[last_move].GetSize()}")
+                # print(f"Length: {self.board[last_move+1].GetSize()}")
+                # print(f"is valid: {self.IsValidMove(last_move)}")
+                # self.PrintBoard()
 
 class Player: #Class for player
     def __init__(self, piece, turn, colour, username):

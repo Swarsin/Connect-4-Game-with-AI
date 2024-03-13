@@ -764,21 +764,17 @@ def add_user(username, password, user_id):
     try:
         conn = sqlite3.connect("c4db.db") #Connect to the database
         cursor = conn.cursor() #Create a cursor object
-
         # Check if user_id already exists
         cursor.execute("SELECT * FROM users WHERE id=?", (user_id,))
         user = cursor.fetchone()
-
         # If user_id already exists, find the next available location
         while user:
             user_id += 1
             cursor.execute("SELECT * FROM users WHERE id=?", (user_id,))
             user = cursor.fetchone()
-
         # Insert the new user
         with conn:
             cursor.execute("INSERT INTO users VALUES (?, ?, ?, 0)", (user_id, username, password))
-            
     except Exception as error: #catch any errors
         print(error)
     finally:
@@ -789,11 +785,9 @@ def search_user(user_id, username):
     try:
         conn = sqlite3.connect("c4db.db") #Connect to the database
         cursor = conn.cursor() #Create a cursor object
-
         # Check if user_id already exists
         cursor.execute("SELECT * FROM users WHERE id=?", (user_id,))
         user = cursor.fetchone()
-
         # If user_id already exists, find the next available location
         while user[1] != username:
             user_id += 1
